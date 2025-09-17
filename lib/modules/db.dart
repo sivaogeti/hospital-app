@@ -385,4 +385,91 @@ class DBHelper {
     };
   }
 
+  // ------------------------------ STOCK DAO ------------------------------
+
+  /// Fetch all stock rows ordered by item name.
+  static Future<List<Map<String, dynamic>>> listStockItems() async {
+    final db = await database;
+    final rows = await db.query(
+      'stock',
+      columns: const ['id', 'item_name', 'category', 'qty', 'unit', 'last_updated'],
+      orderBy: 'LOWER(item_name)',
+    );
+    return rows.map((row) => Map<String, dynamic>.from(row)).toList();
+  }
+
+  /// Insert a stock row if the name is new, otherwise increment its quantity.
+  static Future<void> upsertStockByName({
+    required String itemName,
+    required int deltaQty,
+    String category = '',
+    String unit = 'pcs',
+  }) async {
+    final trimmedName = itemName.trim();
+    if (trimmedName.isEmpty) return;
+
+    final db = await database;
+    final nowIso = DateTime.now().toIso8601String();
+
+    await db.transaction((txn) async {
+      final existing = await txn.query(
+        'stock',
+        columns: const ['id', 'qty'],
+        where: 'item_name = ?',
+        whereArgs: [trimmedName],
+        limit: 1,
+      );
+
+      if (existing.isEmpty) {
+        await txn.insert('stock', {
+          'item_name': trimmedName,
+          'category': category,
+          'qty': deltaQty,
+          'unit': unit,
+          'last_updated': nowIso,
+        });
+      } else {
+        final id = existing.first['id'] as int;
+        final current = (existing.first['qty'] as int?) ?? 0;
+        await txn.update(
+          'stock',
+          {
+            'qty': current + deltaQty,
+            'last_updated': nowIso,
+          },
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+      }
+    });
+  }
+
+  /// Adjust the quantity for the given stock row id by [delta].
+  static Future<void> adjustStock({required int id, required int delta}) async {
+    final db = await database;
+    final nowIso = DateTime.now().toIso8601String();
+
+    await db.transaction((txn) async {
+      final existing = await txn.query(
+        'stock',
+        columns: const ['qty'],
+        where: 'id = ?',
+        whereArgs: [id],
+        limit: 1,
+      );
+      if (existing.isEmpty) return;
+
+      final current = (existing.first['qty'] as int?) ?? 0;
+      await txn.update(
+        'stock',
+        {
+          'qty': current + delta,
+          'last_updated': nowIso,
+        },
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    });
+  }
+
 }
