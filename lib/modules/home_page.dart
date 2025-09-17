@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'patients_page.dart';
 import 'record_vitals_page.dart';
 import 'sugar_test_page.dart';
-import 'inventory_page.dart';
+import 'stock_page.dart';
 import 'profiles_page.dart';
 import 'reports_page.dart';
 
@@ -219,7 +219,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _openInventory() {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => InventoryPage(user: widget.user)));
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => StockPage(
+          username: widget.user['username'] ?? '',
+        ),
+      ),
+    );
   }
 
   void _openProfiles() {
