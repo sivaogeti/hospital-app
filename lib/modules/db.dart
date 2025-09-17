@@ -46,6 +46,8 @@ class DBHelper {
         }
         // Safety: ensure vitals table exists
         await _ensureVitalsTable(db);
+        // Safety: ensure stock table exists
+        await _ensureStockTable(db);
       },
     );
 
@@ -83,6 +85,7 @@ class DBHelper {
     await db.execute('CREATE INDEX IF NOT EXISTS idx_patients_name ON patients(name)');
 
     await _ensureVitalsTable(db);
+    await _ensureStockTable(db);
 
     await db.execute('''
       CREATE TABLE IF NOT EXISTS blood_sugar_tests (
@@ -126,6 +129,23 @@ class DBHelper {
         FOREIGN KEY (fk_patient_id) REFERENCES patients(id) ON DELETE CASCADE
       )
     ''');
+  }
+
+  static Future<void> _ensureStockTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS stock (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        item_name TEXT NOT NULL UNIQUE,
+        category TEXT NOT NULL DEFAULT '',
+        qty INTEGER NOT NULL DEFAULT 0,
+        unit TEXT NOT NULL DEFAULT 'pcs',
+        last_updated TEXT NOT NULL DEFAULT (datetime('now'))
+      )
+    ''');
+    await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_stock_category ON stock(category)');
+    await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_stock_last_updated ON stock(last_updated)');
   }
 
   // ------------------------ PASSWORD / HASH HELPERS ----------------------
@@ -354,8 +374,9 @@ class DBHelper {
         await db.rawQuery('SELECT COUNT(*) FROM blood_sugar_tests')) ?? 0;
     final vitals = Sqflite.firstIntValue(
         await db.rawQuery('SELECT COUNT(*) FROM vitals')) ?? 0;
-    // If you later add an inventory table, replace this with an actual count.
-    final inventory = 0;
+    final inventory =
+        Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM stock')) ??
+            0;
     return {
       'patients': patients,
       'vitals': vitals,
