@@ -1,16 +1,62 @@
-# hospital_app
+# 
 
-A new Flutter project.
+# We already have starter files for pages in this repo—please enhance or replace if needed:
 
-## Getting Started
+# \- `lib/.../stock\_page.dart`
 
-This project is a starting point for a Flutter application.
+# \- `lib/.../health\_profiles\_page.dart`
 
-A few resources to get you started if this is your first Flutter project:
+# \- `lib/.../reports\_page.dart`
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+# 
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# ---
+
+# 
+
+# \## Overflow Note (Flutter)
+
+# Avoid “\*\*BOTTOM OVERFLOWED BY XX PIXELS\*\*” on tiles:
+
+# \- Wrap scrollable containers with `SingleChildScrollView`.
+
+# \- Inside `Column`, place grid/list in `Expanded` (or `Flexible`).
+
+# \- Use fixed tile heights or `AspectRatio` so icons/text don’t exceed card bounds.
+
+# 
+
+# ---
+
+# 
+
+# \## Acceptance Criteria
+
+# \- Dashboard shows tiles for \*\*Inventory/Stock\*\*, \*\*Health Profiles\*\*, \*\*Reports\*\*.
+
+# \- Each page fully functional per spec above.
+
+# \- No overflow warnings at common phone sizes.
+
+# \- `flutter analyze` passes.
+
+# \- Basic unit tests: model serialization + one service mock.
+
+# 
+
+# ---
+
+# 
+
+# \## How to Run
+
+# ```bash
+
+# flutter pub get
+
+# flutter analyze
+
+# flutter run
+
+
+
